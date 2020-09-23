@@ -10,26 +10,25 @@ from google.oauth2 import id_token
 
 # Set variables
 service_account_json = {}
-project_number = "012345678"
+project_number = ""
 audience = 'https://cloudvolumesgcp-api.netapp.com'
 server = 'https://cloudvolumesgcp-api.netapp.com'
 
+# Check to see if variables are set, if not, exit
+def check_variables():
+    if service_account_json == {} or project_number == "":
+        sys.exit("Please set the service_account_json and project_number variables!")
+
 # Small utility function to convert bytes to gibibytes
-
-
 def convertToGiB(bytes):
     return round(bytes/1024/1024/1024, 1)
 
 # Small utility function to convert gibibytes to bytes
-
-
 def convertToBytes(gibibytes):
     return gibibytes*1024*1024*1024
 
 # Use service account json file with correct permissions to authenticate and get headers
-
-
-def get_headers(service_account_json):
+def get_headers():
     # Create credential object from private key
     svc_creds = service_account.Credentials.from_service_account_info(service_account_json)
 
@@ -52,8 +51,6 @@ def get_headers(service_account_json):
     return headers
 
 # Get a list of volumes
-
-
 def get_volumes_list(headers):
     # Get all volumes from all regions
     get_url = server + "/v2/projects/" + \
@@ -76,8 +73,6 @@ def get_volumes_list(headers):
     return volumes
 
 # Compare volume capacity used vs allocated and return volumes that need to be expanded
-
-
 def get_small_volumes(volumes_list):
     volumes_need_resizing_list = []
 
@@ -89,8 +84,6 @@ def get_small_volumes(volumes_list):
     return volumes_need_resizing_list
 
 # Go through volume list and call API to increase volumes
-
-
 def size_up_volumes(volumes_need_resizing_list, headers):
     successful_responses = []
     
@@ -106,8 +99,6 @@ def size_up_volumes(volumes_need_resizing_list, headers):
             
 
 # Resize Volume up to nearest gibibyte
-
-
 def edit_volume_size(volume, headers):
     post_headers = {
         'Content-Type': "application/json",
@@ -128,11 +119,9 @@ def edit_volume_size(volume, headers):
     return response
 
 # Main method
-
-
 def main():
     print("---Script Start---")
-    headers = get_headers(service_account_json)
+    headers = get_headers()
     volumes = get_volumes_list(headers)
     volumes_need_resizing = get_small_volumes(volumes)
     print("Volumes that need resizing: {}".format(len(volumes_need_resizing)))
