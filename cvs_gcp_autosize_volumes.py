@@ -122,6 +122,7 @@ def edit_volume_size(volume, headers):
 # Main method
 def main():
     print("---Script Start---")
+    check_variables()
     headers = get_headers()
     volumes = get_volumes_list(headers)
     volumes_need_resizing = get_small_volumes(volumes)
